@@ -67,14 +67,16 @@ services:
       networks:
         - wpNetwork
     certbot:
-        depends_on:
-          - webserver
-        image: certbot/certbot
-        container_name: certbot
-        volumes:
-          - certbot-etc:/etc/letsencrypt
-          - wordpress:/var/www/html
-        command: certonly --webroot --webroot-path=/var/www/html --email frank@dollyalimentos.com.bo --agree-tos --no-eff-email --staging -d dollyalimentos.com.bo -d www.dollyalimentos.com.bo
+      depends_on:
+        - webserver
+      image: certbot/certbot
+      container_name: certbot
+      volumes:
+        - certbot-etc:/etc/letsencrypt
+        - certbot-var:/var/lib/letsencrypt
+        - wordpress:/var/www/html
+      command: certonly --webroot --webroot-path=/var/www/html --email frank@dollyalimentos.com.bo --agree-tos --no-eff-email --force-renewal -d dollyalimentos.com.bo -d dollyalimentos.com.bo
+
 
 networks:
     wpNetwork:
