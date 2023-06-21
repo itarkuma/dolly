@@ -2,32 +2,17 @@ version: "3"
 services:
     # Database
     db:
-        image: mysql:latest
+        image: mysql:8.0.33-oracle
         container_name: db
         volumes:
             - db_data:/var/lib/mysql
         restart: unless-stopped
         env_file: .env
-        command: '--default-authentication-plugin=mysql_native_password'
         environment:
-            MYSQL_DATABASE: $MYSQL_DATABASE
-        networks:
-            - wpNetwork
-    # phpmyadmin
-    phpmyadmin:
-        depends_on:
-            - db
-        image: phpmyadmin:latest
-        container_name: pma
-        restart: always
-        ports:
-            - "8080:80"
-        env_file: .env
-        environment:
-            PMA_HOST: db
-            MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
-            MYSQL_USER: $MYSQL_USER
-            MYSQL_PASSWORD: $MYSQL_PASSWORD
+            - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+            - MYSQL_DATABASE=$MYSQL_DATABASE
+            - MYSQL_USER=$MYSQL_USER
+            - MYSQL_PASSWORD=$MYSQL_PASSWORD
         networks:
             - wpNetwork
     # WordPress
@@ -37,7 +22,7 @@ services:
         image: wordpress:latest
         container_name: wordpress
         ports:
-            - "8000:80"
+            - "80:80"
         restart: always
         volumes:
             - wordpress:/var/www/html
@@ -52,35 +37,9 @@ services:
         networks:
             - wpNetwork
     # WEB SERVER
-    webserver:
-      depends_on:
-        - wordpress
-      image: nginx:stable-alpine
-      container_name: webserver
-      restart: unless-stopped
-      ports:
-        - "80:80"
-      volumes:
-        - wordpress:/var/www/html
-        - ./nginx-conf:/etc/nginx/conf.d
-        - certbot-etc:/etc/letsencrypt
-      networks:
-        - wpNetwork
-    certbot:
-      depends_on:
-        - webserver
-      image: certbot/certbot
-      container_name: certbot
-      volumes:
-        - certbot-etc:/etc/letsencrypt
-        - certbot-var:/var/lib/letsencrypt
-        - wordpress:/var/www/html
-      command: certonly --webroot --webroot-path=/var/www/html --email frank@dollyalimentos.com.bo --agree-tos --no-eff-email --force-renewal -d dollyalimentos.com.bo -d dollyalimentos.com.bo
-
 
 networks:
     wpNetwork:
 volumes:
-    certbot-etc:
     wordpress:
     db_data:
